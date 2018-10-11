@@ -25,12 +25,13 @@ var (
 func init() {
 	var err error
 	frx, err = regexp.Compile(`%[+# 0]?[sqxXvVT]`)
-	catch(err)
+	Catch(err)
 
 	logErr = log.New(os.Stderr, "✱ ", log.Ltime|log.Lmicroseconds) //|log.Lshortfile
 }
 
-func catch(err error) error {
+//Catch try..catch errors
+func Catch(err error) error {
 	if err != nil {
 		//get error message
 		msg := err.Error()
@@ -44,14 +45,15 @@ func catch(err error) error {
 		msg = strings.Replace(msg, "rpc", "***", -1)
 
 		errorMessage := fmt.Sprintf("%s@%d %s", fn, line, msg)
-		logger(rfg("Error"), errorMessage)
+		Logger(rfg("Error"), errorMessage)
 
 		return errors.New(errorMessage)
 	}
 	return nil
 }
 
-func logger(strs ...interface{}) {
+//Logger logs to standard error
+func Logger(strs ...interface{}) {
 	if _debug {
 		//check if contain format specifier
 		if len(strs) > 1 && frx.MatchString(strs[0].(string)) {
@@ -62,11 +64,13 @@ func logger(strs ...interface{}) {
 	}
 }
 
-func timeTrack(start time.Time, name string) {
+//TimeTrack dump execution time
+func TimeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
-	logger("%s took %s", name, elapsed)
+	Logger("%s took %s", name, elapsed)
 }
 
-func getCurrDir() (string, error) {
+//GetCurrDir current directory of executable
+func GetCurrDir() (string, error) {
 	return filepath.Abs(filepath.Dir(os.Args[0]))
 }
