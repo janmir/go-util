@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -51,6 +52,15 @@ func Catch(err error) error {
 		return errors.New(errorMessage)
 	}
 	return nil
+}
+
+//HTTPCatch try..catch errors
+func HTTPCatch(res http.Response, err error) error {
+	if err == nil && res.StatusCode != http.StatusOK {
+		err = fmt.Errorf("status code was %d", res.StatusCode)
+	}
+
+	return Catch(err)
 }
 
 //Logger logs to standard error
