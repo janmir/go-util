@@ -18,13 +18,14 @@ var (
 	_debug = true
 	frx    *regexp.Regexp
 
-	logErr *log.Logger
-	rfg    = color.New(color.FgHiRed, color.Bold).SprintfFunc()
+	logErr     *log.Logger
+	rfg        = color.New(color.FgHiRed, color.Bold).SprintfFunc()
+	fmtSpecReg = `%[0-9]?\.?[+# 0-9]?[sdfpbcqxXvVtTU]`
 )
 
 func init() {
 	var err error
-	frx, err = regexp.Compile(`%[+# 0]?[sqxXvVT]`)
+	frx, err = regexp.Compile(fmtSpecReg)
 	Catch(err)
 
 	logErr = log.New(os.Stderr, "✱ ", log.Ltime|log.Lmicroseconds) //|log.Lshortfile
