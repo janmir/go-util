@@ -8,14 +8,14 @@ import (
 )
 
 func TestCatch(t *testing.T) {
-	err := catch(errors.New("this is a new error"))
+	err := Catch(errors.New("this is a new error"))
 	if err == nil {
 		t.Fail()
 	}
 }
 
 func TestCurrentDir(t *testing.T) {
-	dir, err := getCurrDir()
+	dir, err := GetCurrDir()
 	if err != nil {
 		t.Fail()
 	}
@@ -28,11 +28,11 @@ func TestCurrentDir(t *testing.T) {
 }
 
 func TestLogger(t *testing.T) {
-	logger("This is a normal Log", "Hello there")
-	logger("✔ %d:%s ", 1, "This is a formatted Log")
+	Logger("This is a normal Log", "Hello there")
+	Logger("✔ %d:%s ", 1, "This is a formatted Log")
 }
 
 func TestTimeTracker(t *testing.T) {
-	timeTrack(time.Now(), "Timecheck:")
+	TimeTrack(time.Now(), "Timecheck:")
 	time.Sleep(time.Second * 5)
 }

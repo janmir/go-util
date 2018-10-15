@@ -20,8 +20,10 @@ var (
 	frx    *regexp.Regexp
 
 	logErr     *log.Logger
-	rfg        = color.New(color.FgHiRed, color.Bold).SprintfFunc()
 	fmtSpecReg = `%[0-9]?\.?[+# 0-9]?[sdfpbcqxXvVtTU]`
+
+	rfg = color.New(color.FgHiRed, color.Bold).SprintfFunc()
+	gfg = color.New(color.FgHiGreen, color.Bold).SprintfFunc()
 )
 
 func init() {
@@ -29,7 +31,7 @@ func init() {
 	frx, err = regexp.Compile(fmtSpecReg)
 	Catch(err)
 
-	logErr = log.New(os.Stderr, "✱ ", log.Ltime|log.Lmicroseconds) //|log.Lshortfile
+	logErr = log.New(os.Stderr, gfg("✱ "), log.Ltime|log.Lmicroseconds) //|log.Lshortfile
 }
 
 //Catch try..catch errors
