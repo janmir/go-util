@@ -15,15 +15,21 @@ import (
 	"github.com/fatih/color"
 )
 
+const (
+	_callDepth = 2
+	_callSep   = "»"
+)
+
 var (
 	_debug = true
-	frx    *regexp.Regexp
 
+	frx        *regexp.Regexp
 	logErr     *log.Logger
 	fmtSpecReg = `%[0-9]?\.?[+# 0-9]?[sdfpbcqxXvVtTU]`
 
 	rfg = color.New(color.FgHiRed, color.Bold).SprintfFunc()
 	gfg = color.New(color.FgHiGreen, color.Bold).SprintfFunc()
+	cfg = color.New(color.FgHiCyan, color.Bold).SprintfFunc()
 )
 
 func init() {
@@ -39,18 +45,25 @@ func Catch(err error) error {
 	if err != nil {
 		//get error message
 		msg := err.Error()
+		caller := ""
 
 		//get error location
-		_, fn, line, _ := runtime.Caller(1)
+		for i := _callDepth; i >= 1; i-- {
+			_, fn, line, _ := runtime.Caller(i)
 
-		//format output message
-		sp := strings.Split(fn, "/")
-		fn = strings.Replace(sp[len(sp)-1], ".go", "***", -1)
-		msg = strings.Replace(msg, "rpc", "***", -1)
+			if line > 0 {
+				//format output message
+				sp := strings.Split(fn, "/")
+				fn = strings.Replace(sp[len(sp)-1], ".go", "*", -1)
+				caller += fmt.Sprintf("%s@%d%s", fn, line, _callSep)
+			}
+		}
+		caller = strings.TrimSuffix(caller, _callSep)
 
-		errorMessage := fmt.Sprintf("%s@%d %s", fn, line, msg)
+		msg = strings.Replace(msg, "rpc", "*", -1)
+		errorMessage := fmt.Sprintf("%s %s", cfg(caller), msg)
+
 		Logger(rfg("Error"), errorMessage)
-
 		return errors.New(errorMessage)
 	}
 	return nil
