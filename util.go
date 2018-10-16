@@ -30,6 +30,8 @@ var (
 	rfg = color.New(color.FgHiRed, color.Bold).SprintfFunc()
 	gfg = color.New(color.FgHiGreen, color.Bold).SprintfFunc()
 	cfg = color.New(color.FgHiCyan, color.Bold).SprintfFunc()
+	mfg = color.New(color.FgHiMagenta, color.Bold).SprintfFunc()
+	yfg = color.New(color.FgHiYellow, color.Bold).SprintfFunc()
 )
 
 func init() {
@@ -78,6 +80,13 @@ func HTTPCatch(res http.Response, err error) error {
 	return Catch(err)
 }
 
+//Recover ...
+func Recover() {
+	if err := recover(); err != nil {
+		Logger(yfg("Recovery"), err)
+	}
+}
+
 //Logger logs to standard error
 func Logger(strs ...interface{}) {
 	if _debug {
@@ -93,10 +102,26 @@ func Logger(strs ...interface{}) {
 //TimeTrack dump execution time
 func TimeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
-	Logger("%s took %s", name, elapsed)
+	Logger("%s %s took %s", mfg("Timestamp"), name, elapsed)
 }
 
 //GetCurrDir current directory of executable
 func GetCurrDir() (string, error) {
 	return filepath.Abs(filepath.Dir(os.Args[0]))
+}
+
+//Max a > b
+func Max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+//Min a < b
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
