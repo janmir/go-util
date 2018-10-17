@@ -23,8 +23,10 @@ const (
 var (
 	_debug = true
 
+	logErr  *log.Logger
+	logInfo *log.Logger
+
 	frx        *regexp.Regexp
-	logErr     *log.Logger
 	fmtSpecReg = `%[0-9]?\.?[+# 0-9]?[sdfpbcqxXvVtTU]`
 
 	rfg = color.New(color.FgHiRed, color.Bold).SprintfFunc()
@@ -40,6 +42,7 @@ func init() {
 	Catch(err)
 
 	logErr = log.New(os.Stderr, gfg("✱ "), log.Ltime|log.Lmicroseconds) //|log.Lshortfile
+	logInfo = log.New(os.Stderr, "", 0)                                 //|log.Lshortfile
 }
 
 //Catch try..catch errors
@@ -92,16 +95,44 @@ func Recover() {
 	}
 }
 
+func fmtr(strs ...interface{}) string {
+	if len(strs) > 1 && frx.MatchString(strs[0].(string)) {
+		return fmt.Sprintf(strs[0].(string), strs[1:]...)
+	}
+	return fmt.Sprintln(strs...)
+}
+
 //Logger logs to standard error
 func Logger(strs ...interface{}) {
 	if _debug {
 		//check if contain format specifier
-		if len(strs) > 1 && frx.MatchString(strs[0].(string)) {
-			logErr.Printf(strs[0].(string), strs[1:]...)
-		} else {
-			logErr.Println(strs...)
-		}
+		logErr.Println(fmtr(strs...))
 	}
+}
+
+//Red prints text in red
+func Red(strs ...interface{}) {
+	logInfo.Println(rfg(fmtr(strs...)))
+}
+
+//Green prints text in green
+func Green(strs ...interface{}) {
+	logInfo.Println(gfg(fmtr(strs...)))
+}
+
+//Cyan prints text in cyan
+func Cyan(strs ...interface{}) {
+	logInfo.Println(cfg(fmtr(strs...)))
+}
+
+//Magenta prints text in magenta
+func Magenta(strs ...interface{}) {
+	logInfo.Println(mfg(fmtr(strs...)))
+}
+
+//Yellow prints text in yellow
+func Yellow(strs ...interface{}) {
+	logInfo.Println(yfg(fmtr(strs...)))
 }
 
 //TimeTrack dump execution time
