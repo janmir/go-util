@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	_callDepth = 2
-	_callSep   = "»"
+	_callDepth = 3
+	_callSep   = " » "
 )
 
 var (
