@@ -43,9 +43,10 @@ func init() {
 }
 
 //Catch try..catch errors
-func Catch(err error) error {
+func Catch(err error, more ...string) error {
 	if err != nil {
 		//get error message
+		errorMessage := ""
 		msg := err.Error()
 		caller := ""
 
@@ -63,7 +64,11 @@ func Catch(err error) error {
 		caller = strings.TrimSuffix(caller, _callSep)
 
 		msg = strings.Replace(msg, "rpc", "*", -1)
-		errorMessage := fmt.Sprintf("%s %s", cfg(caller), msg)
+		if len(more) > 0 {
+			errorMessage = fmt.Sprintf("%s %s %s", cfg(caller), msg, yfg("🛈 "+strings.Join(more, ", ")))
+		} else {
+			errorMessage = fmt.Sprintf("%s %s", cfg(caller), msg)
+		}
 
 		Logger(rfg("Error"), errorMessage)
 		return errors.New(errorMessage)
