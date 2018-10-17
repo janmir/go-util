@@ -1,7 +1,6 @@
 package util
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,13 +17,16 @@ import (
 const (
 	_callDepth = 3
 	_callSep   = " » "
+	_logFile   = "outlook_log.txt"
 )
 
 var (
-	_debug = true
+	_debug       = true
+	_fileLogging = false
 
 	logErr  *log.Logger
 	logInfo *log.Logger
+	logFile *log.Logger
 
 	frx        *regexp.Regexp
 	fmtSpecReg = `%[0-9]?\.?[+# 0-9]?[sdfpbcqxXvVtTU]`
@@ -43,10 +45,22 @@ func init() {
 
 	logErr = log.New(os.Stderr, gfg("✱ "), log.Ltime|log.Lmicroseconds) //|log.Lshortfile
 	logInfo = log.New(os.Stderr, "", 0)                                 //|log.Lshortfile
+
+	if _fileLogging {
+		path, err := GetCurrDir()
+		Catch(err)
+
+		file := filepath.Join(path, _logFile)
+
+		f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		Catch(err)
+
+		logFile = log.New(f, "✱ ", log.Ltime|log.Lmicroseconds) //|log.Lshortfile
+	}
 }
 
 //Catch try..catch errors
-func Catch(err error, more ...string) error {
+func Catch(err error, more ...string) {
 	if err != nil {
 		//get error message
 		errorMessage := ""
@@ -73,19 +87,21 @@ func Catch(err error, more ...string) error {
 			errorMessage = fmt.Sprintf("%s %s", cfg(caller), msg)
 		}
 
+		//Log to standard error
 		Logger(rfg("Error"), errorMessage)
-		return errors.New(errorMessage)
+
+		//Exit
+		os.Exit(1)
 	}
-	return nil
 }
 
 //HTTPCatch try..catch errors
-func HTTPCatch(res http.Response, err error) error {
+func HTTPCatch(res http.Response, err error) {
 	if err == nil && res.StatusCode != http.StatusOK {
 		err = fmt.Errorf("status code was %d", res.StatusCode)
 	}
 
-	return Catch(err)
+	Catch(err)
 }
 
 //Recover ...
@@ -105,34 +121,38 @@ func fmtr(strs ...interface{}) string {
 //Logger logs to standard error
 func Logger(strs ...interface{}) {
 	if _debug {
-		//check if contain format specifier
-		logErr.Println(fmtr(strs...))
+		//Log to file
+		if _fileLogging {
+			logFile.Print(fmtr(strs...))
+		}
+
+		logErr.Print(fmtr(strs...))
 	}
 }
 
 //Red prints text in red
 func Red(strs ...interface{}) {
-	logInfo.Println(rfg(fmtr(strs...)))
+	logInfo.Print(rfg(fmtr(strs...)))
 }
 
 //Green prints text in green
 func Green(strs ...interface{}) {
-	logInfo.Println(gfg(fmtr(strs...)))
+	logInfo.Print(gfg(fmtr(strs...)))
 }
 
 //Cyan prints text in cyan
 func Cyan(strs ...interface{}) {
-	logInfo.Println(cfg(fmtr(strs...)))
+	logInfo.Print(cfg(fmtr(strs...)))
 }
 
 //Magenta prints text in magenta
 func Magenta(strs ...interface{}) {
-	logInfo.Println(mfg(fmtr(strs...)))
+	logInfo.Print(mfg(fmtr(strs...)))
 }
 
 //Yellow prints text in yellow
 func Yellow(strs ...interface{}) {
-	logInfo.Println(yfg(fmtr(strs...)))
+	logInfo.Print(yfg(fmtr(strs...)))
 }
 
 //TimeTrack dump execution time
