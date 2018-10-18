@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/mitchellh/go-ps"
 )
 
 const (
@@ -45,18 +46,6 @@ func init() {
 
 	logErr = log.New(os.Stderr, gfg("✱ "), log.Ltime|log.Lmicroseconds) //|log.Lshortfile
 	logInfo = log.New(os.Stderr, "", 0)                                 //|log.Lshortfile
-
-	if _fileLogging {
-		path, err := GetCurrDir()
-		Catch(err)
-
-		file := filepath.Join(path, _logFile)
-
-		f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		Catch(err)
-
-		logFile = log.New(f, "✱ ", log.Ltime|log.Lmicroseconds) //|log.Lshortfile
-	}
 }
 
 //Catch try..catch errors
@@ -118,6 +107,22 @@ func fmtr(strs ...interface{}) string {
 	return fmt.Sprintln(strs...)
 }
 
+//EnableFileLogging ...
+func EnableFileLogging() {
+	_fileLogging = true
+	if _fileLogging {
+		path, err := GetCurrDir()
+		Catch(err)
+
+		file := filepath.Join(path, _logFile)
+
+		f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		Catch(err)
+
+		logFile = log.New(f, "✱ ", log.Ltime|log.Lmicroseconds) //|log.Lshortfile
+	}
+}
+
 //Logger logs to standard error
 func Logger(strs ...interface{}) {
 	if _debug {
@@ -164,6 +169,25 @@ func TimeTrack(start time.Time, name string) {
 //GetCurrDir current directory of executable
 func GetCurrDir() (string, error) {
 	return filepath.Abs(filepath.Dir(os.Args[0]))
+}
+
+//AmIRunning checks if process with name proc running instances
+func AmIRunning(proc string) int {
+	count := 0
+	pss, err := ps.Processes()
+	Catch(err)
+
+	filex, err := regexp.Compile("^" + proc + "(\\.exe)?$")
+	Catch(err, "Uncompilable Regular Expression")
+
+	for _, v := range pss {
+		name := v.Executable()
+		if filex.MatchString(name) {
+			count++
+		}
+	}
+
+	return count
 }
 
 //Max a > b
