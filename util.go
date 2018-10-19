@@ -1,16 +1,19 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"runtime"
 	"strings"
 	"time"
 
+	"github.com/beevik/ntp"
 	"github.com/fatih/color"
 	"github.com/mitchellh/go-ps"
 )
@@ -33,10 +36,12 @@ var (
 	fmtSpecReg = `%[0-9]?\.?[+# 0-9]?[sdfpbcqxXvVtTU]`
 
 	rfg = color.New(color.FgHiRed, color.Bold).SprintfFunc()
+	bfg = color.New(color.FgHiBlue, color.Bold).SprintfFunc()
 	gfg = color.New(color.FgHiGreen, color.Bold).SprintfFunc()
 	cfg = color.New(color.FgHiCyan, color.Bold).SprintfFunc()
 	mfg = color.New(color.FgHiMagenta, color.Bold).SprintfFunc()
 	yfg = color.New(color.FgHiYellow, color.Bold).SprintfFunc()
+	wfg = color.New(color.FgHiWhite, color.Bold).SprintfFunc()
 )
 
 func init() {
@@ -63,17 +68,19 @@ func Catch(err error, more ...string) {
 			if line > 0 {
 				//format output message
 				sp := strings.Split(fn, "/")
-				fn = strings.Replace(sp[len(sp)-1], ".go", "*", -1)
-				caller += fmt.Sprintf("%s@%d%s", fn, line, _callSep)
+				fn = strings.Replace(sp[len(sp)-1], ".go", "", -1)
+				caller += fmt.Sprintf("%s:%d%s", fn, line, _callSep)
 			}
 		}
 		caller = strings.TrimSuffix(caller, _callSep)
 
-		msg = strings.Replace(msg, "rpc", "*", -1)
+		//Further replace
+		// msg = strings.Replace(msg, "rpc", "***", -1)
+
 		if len(more) > 0 {
-			errorMessage = fmt.Sprintf("%s %s %s", cfg(caller), msg, yfg("🛈 "+strings.Join(more, ", ")))
+			errorMessage = fmt.Sprintf("%s %s %s", cfg(caller), wfg(msg), yfg("🛈 "+strings.Join(more, ", ")))
 		} else {
-			errorMessage = fmt.Sprintf("%s %s", cfg(caller), msg)
+			errorMessage = fmt.Sprintf("%s %s", cfg(caller), wfg(msg))
 		}
 
 		//Log to standard error
@@ -85,12 +92,12 @@ func Catch(err error, more ...string) {
 }
 
 //HTTPCatch try..catch errors
-func HTTPCatch(res http.Response, err error) {
+func HTTPCatch(res *http.Response, err error, more ...string) {
 	if err == nil && res.StatusCode != http.StatusOK {
 		err = fmt.Errorf("status code was %d", res.StatusCode)
 	}
 
-	Catch(err)
+	Catch(err, more...)
 }
 
 //Recover ...
@@ -105,6 +112,14 @@ func fmtr(strs ...interface{}) string {
 		return fmt.Sprintf(strs[0].(string), strs[1:]...)
 	}
 	return fmt.Sprintln(strs...)
+}
+
+//IsInterfaceAPointer checks if an interface is of type pointer
+func IsInterfaceAPointer(val interface{}) {
+	v := reflect.ValueOf(val)
+	if v.Kind() != reflect.Ptr {
+		Catch(errors.New("non-pointer passed to Unmarshal"))
+	}
 }
 
 //EnableFileLogging ...
@@ -137,33 +152,43 @@ func Logger(strs ...interface{}) {
 
 //Red prints text in red
 func Red(strs ...interface{}) {
-	logInfo.Print(rfg(fmtr(strs...)))
+	str := strings.TrimSpace(fmtr(strs...))
+	logInfo.Print(rfg(str))
 }
 
 //Green prints text in green
 func Green(strs ...interface{}) {
-	logInfo.Print(gfg(fmtr(strs...)))
+	str := strings.TrimSpace(fmtr(strs...))
+	logInfo.Print(gfg(str))
 }
 
 //Cyan prints text in cyan
 func Cyan(strs ...interface{}) {
-	logInfo.Print(cfg(fmtr(strs...)))
+	str := strings.TrimSpace(fmtr(strs...))
+	logInfo.Print(cfg(str))
 }
 
 //Magenta prints text in magenta
 func Magenta(strs ...interface{}) {
-	logInfo.Print(mfg(fmtr(strs...)))
+	str := strings.TrimSpace(fmtr(strs...))
+	logInfo.Print(mfg(str))
 }
 
 //Yellow prints text in yellow
 func Yellow(strs ...interface{}) {
-	logInfo.Print(yfg(fmtr(strs...)))
+	str := strings.TrimSpace(fmtr(strs...))
+	logInfo.Print(yfg(str))
 }
 
 //TimeTrack dump execution time
 func TimeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
 	Logger("%s %s took %s", mfg("Timestamp"), name, elapsed)
+}
+
+//GetNTPTime return ntp time
+func GetNTPTime() (time.Time, error) {
+	return ntp.Time("time.apple.com")
 }
 
 //GetCurrDir current directory of executable
