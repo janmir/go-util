@@ -122,6 +122,11 @@ func IsInterfaceAPointer(val interface{}) {
 	}
 }
 
+//DisableLogging ...
+func DisableLogging() {
+	_debug = false
+}
+
 //EnableFileLogging ...
 func EnableFileLogging() {
 	_fileLogging = true
