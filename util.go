@@ -188,7 +188,7 @@ func Yellow(strs ...interface{}) {
 //TimeTrack dump execution time
 func TimeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
-	Logger("%s %s took %s", mfg("Timestamp"), name, elapsed)
+	Logger("%s %s took %s", mfg("Timestamp"), rfg(name), elapsed)
 }
 
 //GetNTPTime return ntp time
