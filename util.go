@@ -201,6 +201,14 @@ func GetCurrDir() (string, error) {
 	return filepath.Abs(filepath.Dir(os.Args[0]))
 }
 
+//Localize returns the absolute path the file
+func Localize(file string) string {
+	dir, err := GetCurrDir()
+	Catch(err)
+
+	return filepath.Join(dir, file)
+}
+
 //AmIRunning checks if process with name proc running instances
 func AmIRunning(proc string) int {
 	count := 0
