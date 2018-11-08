@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -52,6 +53,12 @@ func init() {
 	logErr = log.New(os.Stderr, gfg("✱ "), log.Ltime|log.Lmicroseconds) //|log.Lshortfile
 	logInfo = log.New(os.Stderr, "", 0)                                 //|log.Lshortfile
 }
+
+/*********************************/
+/*
+/*		 Error Handlers
+/*
+/*********************************/
 
 //Catch try..catch errors
 func Catch(err error, more ...string) {
@@ -107,19 +114,17 @@ func Recover() {
 	}
 }
 
+/*********************************/
+/*
+/*			 Logging Fn
+/*
+/*********************************/
+
 func fmtr(strs ...interface{}) string {
 	if len(strs) > 1 && frx.MatchString(strs[0].(string)) {
 		return fmt.Sprintf(strs[0].(string), strs[1:]...)
 	}
 	return fmt.Sprintln(strs...)
-}
-
-//IsInterfaceAPointer checks if an interface is of type pointer
-func IsInterfaceAPointer(val interface{}) {
-	v := reflect.ValueOf(val)
-	if v.Kind() != reflect.Ptr {
-		Catch(errors.New("non-pointer passed to Unmarshal"))
-	}
 }
 
 //DisableLogging ...
@@ -191,6 +196,20 @@ func TimeTrack(start time.Time, name string) {
 	Logger("%s %s took %s", mfg("Timestamp"), rfg(name), elapsed)
 }
 
+/*********************************/
+/*
+/*			 Helper Fn
+/*
+/*********************************/
+
+//IsInterfaceAPointer checks if an interface is of type pointer
+func IsInterfaceAPointer(val interface{}) {
+	v := reflect.ValueOf(val)
+	if v.Kind() != reflect.Ptr {
+		Catch(errors.New("non-pointer passed to Unmarshal"))
+	}
+}
+
 //GetNTPTime return ntp time
 func GetNTPTime() (time.Time, error) {
 	return ntp.Time("time.apple.com")
@@ -201,7 +220,8 @@ func GetCurrDir() (string, error) {
 	return filepath.Abs(filepath.Dir(os.Args[0]))
 }
 
-//Localize returns the absolute path the file
+//Localize returns the absolute path of the file
+//relative to the executable
 func Localize(file string) string {
 	dir, err := GetCurrDir()
 	Catch(err)
@@ -242,4 +262,17 @@ func Min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+//Rand return a random number from a to b
+func Rand(a, b int) int {
+	if a < b {
+		seed := rand.NewSource(time.Now().UnixNano())
+		randomizer := rand.New(seed)
+		no := randomizer.Intn(b - a)
+
+		return a + no
+	}
+
+	return -1
 }
