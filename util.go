@@ -248,20 +248,26 @@ func AmIRunning(proc string) int {
 	return count
 }
 
-//Max a > b
-func Max(a, b int) int {
-	if a > b {
-		return a
+//Max a > b, c ....
+func Max(a int, b ...int) int {
+	max := a
+	for _, val := range b {
+		if max < val {
+			max = val
+		}
 	}
-	return b
+	return max
 }
 
-//Min a < b
-func Min(a, b int) int {
-	if a < b {
-		return a
+//Min a < b, c ...
+func Min(a int, b ...int) int {
+	min := a
+	for _, val := range b {
+		if min > val {
+			min = val
+		}
 	}
-	return b
+	return min
 }
 
 //Rand return a random number from a to b
@@ -270,7 +276,6 @@ func Rand(a, b int) int {
 		seed := rand.NewSource(time.Now().UnixNano())
 		randomizer := rand.New(seed)
 		no := randomizer.Intn(b - a)
-
 		return a + no
 	}
 
