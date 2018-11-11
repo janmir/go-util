@@ -16,6 +16,7 @@ import (
 
 	"github.com/beevik/ntp"
 	"github.com/fatih/color"
+	mailgun "github.com/janmir/go-mailgun"
 	"github.com/mitchellh/go-ps"
 )
 
@@ -32,6 +33,9 @@ var (
 	logErr  *log.Logger
 	logInfo *log.Logger
 	logFile *log.Logger
+
+	//Mail logger
+	mailer mailgun.Mail
 
 	frx        *regexp.Regexp
 	fmtSpecReg = `%[0-9]?\.?[+# 0-9]?[sdfpbcqxXvVtTU]`
@@ -194,6 +198,23 @@ func Yellow(strs ...interface{}) {
 func TimeTrack(start time.Time, name string) {
 	elapsed := time.Since(start)
 	Logger("%s %s took %s", mfg("Timestamp"), rfg(name), elapsed)
+}
+
+//CreateMailer creates a mailgun client
+func CreateMailer(domain, api string) {
+	mailer = mailgun.DefaultMailClient(domain, api)
+}
+
+//SendMail sends the mailgun emai
+func SendMail(to, from, subject, msg string) error {
+	mailer.Create(to, from, subject, msg)
+	out, err := mailer.Send()
+	if err != nil {
+		return err
+	}
+
+	Logger("Mail Sent: %+v", out)
+	return nil
 }
 
 /*********************************/
