@@ -3,6 +3,7 @@ package util
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -23,12 +24,13 @@ import (
 const (
 	_callDepth = 3
 	_callSep   = " » "
-	_logFile   = "outlook_log.txt"
+	_logFile   = "_log.txt"
 )
 
 var (
-	_debug       = true
-	_fileLogging = false
+	_debug          = true
+	_fileLogging    = false
+	_consoleLogging = true
 
 	logErr  *log.Logger
 	logInfo *log.Logger
@@ -136,6 +138,11 @@ func DisableLogging() {
 	_debug = false
 }
 
+//DisableConsoleLogging ...
+func DisableConsoleLogging() {
+	_consoleLogging = false
+}
+
 //EnableFileLogging ...
 func EnableFileLogging() {
 	_fileLogging = true
@@ -160,7 +167,9 @@ func Logger(strs ...interface{}) {
 			logFile.Print(fmtr(strs...))
 		}
 
-		logErr.Print(fmtr(strs...))
+		if _consoleLogging {
+			logErr.Print(fmtr(strs...))
+		}
 	}
 }
 
@@ -255,6 +264,72 @@ func Localize(file string) string {
 	Catch(err)
 
 	return filepath.Join(dir, file)
+}
+
+//GetFiles returns all files with the extension
+//if provided if not all files
+func GetFiles(path string, subdir bool, ext ...string) []string {
+	files := make([]string, 0)
+
+	//get absolute path
+	root, err := filepath.Abs(path)
+	Catch(err)
+
+	if subdir {
+		err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+			if info.IsDir() {
+				return nil
+			}
+			if len(ext) > 0 {
+				x := filepath.Ext(path)
+				for _, v := range ext {
+					if strings.Contains(x, v) {
+						files = append(files, path)
+					}
+				}
+			} else {
+				files = append(files, path)
+			}
+			return nil
+		})
+		Catch(err)
+	} else {
+		fs, err := ioutil.ReadDir(root)
+		Catch(err)
+
+		for _, file := range fs {
+			path := file.Name()
+			full := filepath.Join(root, path)
+			if len(ext) > 0 {
+				x := filepath.Ext(path)
+				for _, v := range ext {
+					if strings.Contains(x, v) {
+						files = append(files, full)
+					}
+				}
+			} else {
+				files = append(files, full)
+			}
+		}
+	}
+
+	return files
+}
+
+//Debounce calls a function only once after an interval
+func Debounce(interval time.Duration, input chan interface{}, fn func(arg interface{})) {
+	var item interface{}
+	timer := time.NewTimer(interval)
+	for {
+		select {
+		case item = <-input:
+			timer.Reset(interval)
+		case <-timer.C:
+			if item != 0 {
+				fn(item)
+			}
+		}
+	}
 }
 
 //AmIRunning checks if process with name proc running instances
