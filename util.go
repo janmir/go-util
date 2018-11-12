@@ -195,9 +195,16 @@ func Yellow(strs ...interface{}) {
 }
 
 //TimeTrack dump execution time
-func TimeTrack(start time.Time, name string) {
+//TimeTrack dump execution time
+func TimeTrack(start time.Time, name string, cb ...func(string)) {
 	elapsed := time.Since(start)
-	Logger("%s %s took %s", mfg("Timestamp"), rfg(name), elapsed)
+	if len(cb) > 0 {
+		for _, fn := range cb {
+			fn(fmt.Sprintf("%s", elapsed))
+		}
+	} else {
+		Logger("%s %s took %s", mfg("Timestamp"), rfg(name), elapsed)
+	}
 }
 
 //CreateMailer creates a mailgun client
