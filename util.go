@@ -325,9 +325,7 @@ func Debounce(interval time.Duration, input chan interface{}, fn func(arg interf
 		case item = <-input:
 			timer.Reset(interval)
 		case <-timer.C:
-			if item != 0 {
-				fn(item)
-			}
+			fn(item)
 		}
 	}
 }
