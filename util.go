@@ -32,8 +32,16 @@ var (
 	_fileLogging    = false
 	_consoleLogging = true
 
-	logErr  *log.Logger
+	//Logs to standard error, can be disabled
+	//by calling DisableConsoleLogging()
+	logErr *log.Logger
+	//Logs to standard error
+	//Disabling this logger is not
+	//possible, you usually use this one for
+	//important INFO logs
 	logInfo *log.Logger
+	//Logs to a file with filename _logFile
+	//can be enabled by calling EnableFileLogging()
 	logFile *log.Logger
 
 	//Mail logger
@@ -42,6 +50,8 @@ var (
 	frx        *regexp.Regexp
 	fmtSpecReg = `%[0-9]?\.?[+# 0-9]?[sdfpbcqxXvVtTU]`
 
+	//Color Sprintf functions, mostly used by
+	//the logInfo logger
 	rfg = color.New(color.FgHiRed, color.Bold).SprintfFunc()
 	bfg = color.New(color.FgHiBlue, color.Bold).SprintfFunc()
 	gfg = color.New(color.FgHiGreen, color.Bold).SprintfFunc()
