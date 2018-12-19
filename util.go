@@ -100,6 +100,8 @@ func Catch(err error, more ...string) {
 		Logger(rfg("Error"), errorMessage)
 
 		//Exit
+		//should use fatal from log or fmt
+		//os.exit does not call defered functions
 		os.Exit(1)
 	}
 }
