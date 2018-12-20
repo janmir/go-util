@@ -43,6 +43,8 @@ var (
 	//Logs to a file with filename _logFile
 	//can be enabled by calling EnableFileLogging()
 	logFile *log.Logger
+	//Null logger
+	logNull *log.Logger
 
 	//Mail logger
 	mailer mailgun.Mail
@@ -68,6 +70,7 @@ func init() {
 
 	logErr = log.New(os.Stderr, gfg("✱ "), log.Ltime|log.Lmicroseconds) //|log.Lshortfile
 	logInfo = log.New(os.Stderr, "", 0)                                 //|log.Lshortfile
+	logNull = log.New(ioutil.Discard, "", 0)
 }
 
 /*********************************/
