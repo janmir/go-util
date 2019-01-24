@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+var (
+	token = "*********"
+)
+
 func TestCatch(t *testing.T) {
 	//err := Catch(errors.New("this is a new error"))
 	//if err == nil {
@@ -46,4 +50,9 @@ func TestMinMax(t *testing.T) {
 	if max != -1 {
 		t.Errorf("max should be %d got %d", 8, max)
 	}
+}
+
+func TestIPLookup(t *testing.T) {
+	details := GetPublicIPDetails(token)
+	Logger("My Public IP Details: %+v", details)
 }

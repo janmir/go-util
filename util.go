@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -26,6 +27,18 @@ const (
 	_callSep   = " » "
 	_logFile   = "_log.txt"
 )
+
+//IPData details about the caller
+//Ip address
+type IPData struct {
+	IP      string `json:"ip"`
+	City    string `json:"city"`
+	Region  string `json:"region"`
+	Country string `json:"country"`
+	Loc     string `json:"loc"`
+	Postal  string `json:"postal"`
+	Org     string `json:"org"`
+}
 
 var (
 	_debug          = true
@@ -329,6 +342,36 @@ func GetFiles(path string, subdir bool, ext ...string) []string {
 	}
 
 	return files
+}
+
+//GetPublicIPDetails returns the callers
+//Ip address details includes location, etc...
+func GetPublicIPDetails(token string) IPData {
+	ipd := IPData{}
+	client := &http.Client{
+		Timeout: time.Duration(10 * time.Second),
+	}
+
+	//Source list
+	ipstack := "http://api.ipstack.com/check?access_key=" + token
+	ipinfo := "https://ipinfo.io?token=" + token
+	_, _ = ipstack, ipinfo
+
+	req, err := http.NewRequest("GET", ipinfo, nil)
+	req.Header.Set("User-Agent", "curl")
+	resp, err := client.Do(req)
+	HTTPCatch(resp, err, "Unable to fetch data from url")
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		Catch(err)
+	}
+
+	if err := json.Unmarshal(b, &ipd); err != nil {
+		Catch(err)
+	}
+
+	return ipd
 }
 
 //Debounce calls a function only once after an interval
