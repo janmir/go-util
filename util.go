@@ -49,6 +49,9 @@ var (
 	_fileLogging    = false
 	_consoleLogging = true
 
+	//internet connection check
+	_internetCheckURL = "http://clients3.google.com/generate_204"
+
 	//Logs to standard error, can be disabled
 	//by calling DisableConsoleLogging()
 	logErr *log.Logger
@@ -352,6 +355,26 @@ func GetFiles(path string, subdir bool, ext ...string) []string {
 	}
 
 	return files
+}
+
+//IsConnectedToInternet checks if you are currently connected
+//to the internet, timeout is set to 1.5 seconds
+func IsConnectedToInternet(path ...string) bool {
+	url := _internetCheckURL
+	if len(path) == 1 {
+		url = path[0]
+	}
+
+	client := &http.Client{
+		Timeout: 1500 * time.Millisecond,
+	}
+	_, err := client.Get(url)
+
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
 //GetPublicIPDetails returns the callers
