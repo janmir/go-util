@@ -257,6 +257,10 @@ func CreateMailer(domain, api string) {
 
 //SendMail sends the mailgun emai
 func SendMail(to, from, subject, msg string) error {
+	if !mailer.Initialized {
+		Red("Initialize mail client first using [CreateMail] function.")
+	}
+
 	mailer.Create(to, from, subject, msg)
 	out, err := mailer.Send()
 	if err != nil {
