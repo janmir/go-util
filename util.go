@@ -52,6 +52,15 @@ var (
 	//internet connection check
 	_internetCheckURL = "http://clients3.google.com/generate_204"
 
+	//Network Time Protocol Servers
+	_appleNTP  = "time.apple.com"
+	_googleNTP = "time.google.com"
+
+	//AppleNTP public ntp variable
+	AppleNTP = _appleNTP
+	//GoogleNTP public ntp variable
+	GoogleNTP = _googleNTP
+
 	//Logs to standard error, can be disabled
 	//by calling DisableConsoleLogging()
 	logErr *log.Logger
@@ -289,8 +298,14 @@ func IsInterfaceAPointer(val interface{}) {
 }
 
 //GetNTPTime return ntp time
-func GetNTPTime() (time.Time, error) {
-	return ntp.Time("time.apple.com")
+//Available servers are AppleNTP, GoogleNTP
+func GetNTPTime(server ...string) (time.Time, error) {
+	serve := _appleNTP
+	if len(server) == 1 {
+		serve = server[0]
+	}
+
+	return ntp.Time(serve)
 }
 
 //GetCurrDir current directory of executable

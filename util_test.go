@@ -56,3 +56,17 @@ func TestIPLookup(t *testing.T) {
 	details := GetPublicIPDetails(token)
 	Logger("My Public IP Details: %+v", details)
 }
+
+func TestNTP(t *testing.T) {
+	ntp, err := GetNTPTime(AppleNTP)
+	if err != nil {
+		t.Fail()
+	}
+	Logger("Apple NTP Time: %+v", ntp)
+
+	ntp, err = GetNTPTime(GoogleNTP)
+	if err != nil {
+		t.Fail()
+	}
+	Logger("Google NTP Time: %+v", ntp)
+}
