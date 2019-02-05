@@ -401,9 +401,10 @@ func GetPublicIPDetails(token string) IPData {
 	}
 
 	//Source list
+	ip2location := "https://www.ip2location.com/{IP}"
 	ipstack := "http://api.ipstack.com/check?access_key=" + token
 	ipinfo := "https://ipinfo.io?token=" + token
-	_, _ = ipstack, ipinfo
+	_, _, _ = ipstack, ipinfo, ip2location
 
 	req, err := http.NewRequest("GET", ipinfo, nil)
 	req.Header.Set("User-Agent", "curl")
