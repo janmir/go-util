@@ -133,7 +133,7 @@ func Catch(err error, more ...string) {
 		// msg = strings.Replace(msg, "rpc", "***", -1)
 
 		if len(more) > 0 {
-			errorMessage = fmt.Sprintf("%s %s %s", cfg(caller), wfg(msg), yfg("🛈 "+strings.Join(more, ", ")))
+			errorMessage = fmt.Sprintf("%s %s %s", cfg(caller), wfg(msg), yfg(strings.Join(more, ", ")))
 		} else {
 			errorMessage = fmt.Sprintf("%s %s", cfg(caller), wfg(msg))
 		}
@@ -249,7 +249,6 @@ func Yellow(strs ...interface{}) {
 	logInfo.Print(yfg(str))
 }
 
-//TimeTrack dump execution time
 //TimeTrack dump execution time
 func TimeTrack(start time.Time, name string, cb ...func(string)) {
 	elapsed := time.Since(start)
@@ -438,6 +437,7 @@ func Debounce(interval time.Duration, input chan interface{}, fn func(arg interf
 }
 
 //AmIRunning checks if process with name proc running instances
+//accepts with extension or none
 func AmIRunning(proc string) int {
 	count := 0
 	pss, err := ps.Processes()
@@ -452,7 +452,6 @@ func AmIRunning(proc string) int {
 			count++
 		}
 	}
-
 	return count
 }
 
