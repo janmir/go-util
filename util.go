@@ -534,3 +534,18 @@ func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
 	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
 	return gcm.Open(nil, nonce, ciphertext, nil)
 }
+
+// MatchToMap returns a map of the named groups
+// e.g `(?P<first>\d+)\.(\d+).(?P<second>\d+)`
+// yields map[string]string{first: "", second: ""}
+func MatchToMap(r *regexp.Regexp, str string) map[string]string {
+	match := r.FindStringSubmatch(str)
+	result := make(map[string]string)
+	for i, name := range r.SubexpNames() {
+		if i != 0 && name != "" {
+			result[name] = match[i]
+		}
+	}
+
+	return result
+}
