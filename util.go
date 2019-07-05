@@ -549,3 +549,17 @@ func MatchToMap(r *regexp.Regexp, str string) map[string]string {
 
 	return result
 }
+
+// FileExist checks if a file exists
+// if dir where the file is located is non-existent
+// returns an error
+func FileExist(path string)(bool, error){
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		} else {
+			return false, err
+		}
+	}
+	return true, nil
+}
