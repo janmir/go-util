@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -32,7 +33,7 @@ func TestCurrentDir(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	Logger("This is a normal Log", "Hello there")
-	Logger("✔ %d:%s ", 1, "This is a formatted Log")
+	Loggerf("✔ %d:%s ", 1, "This is a formatted Log")
 }
 
 func TestTimeTracker(t *testing.T) {
@@ -54,7 +55,7 @@ func TestMinMax(t *testing.T) {
 
 func TestIPLookup(t *testing.T) {
 	details := GetPublicIPDetails(token)
-	Logger("My Public IP Details: %+v", details)
+	Loggerf("My Public IP Details: %+v", details)
 }
 
 func TestNTP(t *testing.T) {
@@ -62,11 +63,33 @@ func TestNTP(t *testing.T) {
 	if err != nil {
 		t.Fail()
 	}
-	Logger("Apple NTP Time: %+v", ntp)
+	Loggerf("Apple NTP Time: %+v", ntp)
 
 	ntp, err = GetNTPTime(GoogleNTP)
 	if err != nil {
 		t.Fail()
 	}
-	Logger("Google NTP Time: %+v", ntp)
+	_ = ntp
+	Loggerf("Google NTP Time: %+v", ntp)
+}
+
+func TestMapDecode(t *testing.T) {
+	strct := struct {
+		Key1 string
+		Key2 string
+	}{}
+	_ = strct
+	str := ""
+	_ = str
+	okmap := map[string]string{
+		"Key1": "Value01",
+		"key2": "Value02",
+		"Key3": "Value02",
+	}
+	_ = okmap
+	empty := map[string]string{}
+	_ = empty
+
+	err := MapDecode(&strct, okmap)
+	fmt.Printf("Error: %v, %+v\n", err, strct)
 }

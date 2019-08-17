@@ -179,6 +179,10 @@ func fmtr(strs ...interface{}) string {
 	return fmt.Sprintln(strs...)
 }
 
+func fmtrf(format string, strs ...interface{}) string {
+	return fmt.Sprintf(format, strs...)
+}
+
 //DisableLogging ...
 func DisableLogging() {
 	_debug = false
@@ -215,6 +219,20 @@ func Logger(strs ...interface{}) {
 
 		if _consoleLogging {
 			logErr.Print(fmtr(strs...))
+		}
+	}
+}
+
+//Loggerf logs to standard error
+func Loggerf(format string, strs ...interface{}) {
+	if _debug {
+		//Log to file
+		if _fileLogging {
+			logFile.Print(fmtrf(format, strs...))
+		}
+
+		if _consoleLogging {
+			logErr.Print(fmtrf(format, strs...))
 		}
 	}
 }
@@ -257,7 +275,7 @@ func TimeTrack(start time.Time, name string, cb ...func(string)) {
 			fn(fmt.Sprintf("%s", elapsed))
 		}
 	} else {
-		Logger("%s %s took %s", mfg("Timestamp"), rfg(name), elapsed)
+		Loggerf("%s %s took %s", mfg("Timestamp"), rfg(name), elapsed)
 	}
 }
 
@@ -278,7 +296,7 @@ func SendMail(to, from, subject, msg string) error {
 		return err
 	}
 
-	Logger("Mail Sent: %+v", out)
+	Loggerf("Mail Sent: %+v", out)
 	return nil
 }
 
@@ -553,13 +571,45 @@ func MatchToMap(r *regexp.Regexp, str string) map[string]string {
 // FileExist checks if a file exists
 // if dir where the file is located is non-existent
 // returns an error
-func FileExist(path string)(bool, error){
+func FileExist(path string) (bool, error) {
 	if _, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			return false, nil
-		} else {
-			return false, err
 		}
+		return false, err
 	}
 	return true, nil
+}
+
+// MapDecode decodes a map[string]string to
+// a struct
+// out: a pointer to a struct
+// maps: map of values
+func MapDecode(out interface{}, maps map[string]string) error {
+	// Check if its a pointer
+	v := reflect.ValueOf(out)
+	if v.Kind() != reflect.Ptr {
+		return errors.New("output variable is not a pointer")
+	}
+
+	iv := reflect.Indirect(v)
+	if iv.Kind() != reflect.Struct {
+		return errors.New("output variable is not a pointer to struct")
+	}
+
+	if len(maps) == 0 {
+		return errors.New("map is empty")
+	}
+
+	// Do conversions
+	for i := 0; i < iv.NumField(); i++ {
+		t := iv.Type()
+		name := t.Field(i).Name
+
+		if value, ok := maps[name]; ok {
+			iv.Field(i).SetString(value)
+		}
+	}
+
+	return nil
 }
